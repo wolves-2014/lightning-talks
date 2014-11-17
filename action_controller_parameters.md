@@ -1,102 +1,82 @@
-<h1>Action Controller Parameters</h1>
+# Action Controller Parameters
 
-<h2>MASS ASSIGNMENT</h2>
 
-<pre><code>
+## First, some definitions
+### Mass Assignment
+
+```ruby
 def create
     Person.create(params[:person])
 end
-</pre></code>
+```
 
-<h2>NOT MASS ASSIGNMENT</h2>
+### Not Mass Assignment
 
-<pre><code>
+```ruby
 def update
   person = current_account.people.find(params[:id])
   person.update!(person_params)
   redirect_to person
 end
- </br>
+
 private
 def person_params
   params.require(:person).permit(:name, :age)
 end
-</pre></code>
+```
 
-<h2>ISSUES</h2>
-<ul>
-<li>Whitelists vs blacklists</li>
-<li>Rails does not make any distinction between query string parameters and POST parameters, and both are available in the params hash in your controller</li>
-<li>Prevent accidentally allowing data to be changed which shouldn’t be exposed (Github 2012)</li>
-</ul>
+## Issues
+* Whitelists vs blacklists
+* Rails does not make any distinction between query string parameters and POST parameters, and both are available in the params hash in your controller
+* Prevent accidentally allowing data to be changed which shouldn’t be exposed (Github 2012)
 
-<h2>ASSUMED</h2>
-<code>
-params.permit(:id)
-</code>
-
-<h2>SOLUTION</h2>
-<p>
+## Solution -- require whitelisting
 With strong parameters, Action Controller parameters are forbidden to be used in Active Model mass assignments until they have been whitelisted.
-</p>
 
-<h2>REQUIRE</h2>
-<p>
+`id` is permitted by default
+
+```ruby
+params.permit(:id)
+```
+
+
+## Requiring certain param keys
 Ensures that a parameter is present. If it's present, returns the parameter at the given key, otherwise raises an ActionController::ParameterMissing error.
-</p>
 
-<p>
+```ruby
 ActionController::Parameters.new(person: { name: 'Francesco' }).require(:person)
- <br />
-# => {"name"=>"Francesco"}
-</p>
+=> {"name"=>"Francesco"}
+```
 
-<p>
+```ruby
 ActionController::Parameters.new(person: nil).require(:person)
- <br />
-# => ActionController::ParameterMissing: param not found: person
-</p>
+=> ActionController::ParameterMissing: param not found: person
+```
 
-<p>
+```ruby
 ActionController::Parameters.new(person: {}).require(:person)
- <br />
-# => ActionController::ParameterMissing: param not found: person
-</p>
+=> ActionController::ParameterMissing: param not found: person
+```
 
-<h2>PERMIT</h2>
-<p>
+## Permitting certain param keys
 Sets the permitted attribute to true. This can be used to pass mass assignment. Returns self.
 
-<p>
+```ruby
 params = ActionController::Parameters.new(name: 'Francesco')
- <br />
+
 params.permitted?  # => false
-<br />
- <br />
+```
+
+```ruby
 Person.new(params) # => ActiveModel::ForbiddenAttributesError
- <br />
 params.permit!
- <br />
+
 params.permitted?  # => true
- <br />
+
 Person.new(params) # => #<Person id: nil, name: "Francesco">
- <br />
-</p>
+```
 
-<h2>SOURCES</h2>
-
-<ul>
-<li>Great introduction
- <br />
-http://code.tutsplus.com/tutorials/mass-assignment-rails-and-you--net-31695
- <br />
-</li>
-
-<li>
-Multiple models, one form
- <br />
-http://railscasts.com/episodes/196-nested-model-form-part-1
- <br />
-</li>
-</ul>
-
+## Resources
+* [Mass Assignment & You](http://code.tutsplus.com/tutorials/mass-assignment-rails-and-you--net-31695)
+* [Multiple Models, One Form](http://railscasts.com/episodes/196-nested-model-form-part-1)
+ 
